@@ -42,7 +42,7 @@ Each lab folder contains relevant screenshots and test outputs to demonstrate pr
 - [Lab 1: Setup Code Quality & Unit Testing](./lab1-setup-code-quality/)
 - [Lab 2: Bedrock AI Integration & EC2 Deployment](./lab2-deploy-base-app/)
 - [Lab 3: Setup CI/CD Pipeline](./lab3-setup-cicd/)
-- [Lab 4: Deploy Infrastructure with CDK](./lab4-deploy-with-cdk/)
+- [Lab 4: Deploy Infrastructure with CDK](./lab4-cdk-infra-deploy/)
 
 ## 🧪 Next Steps
 - Continue Labs 5–7 to complete end-to-end DevOps pipeline
