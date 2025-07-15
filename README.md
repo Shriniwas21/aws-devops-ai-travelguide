@@ -32,7 +32,7 @@ Each lab folder contains relevant screenshots and test outputs to demonstrate pr
 | 1 | Code Quality & Unit Testing | ✅ Completed | Flask app run, PyLint, test coverage |
 | 2 | Bedrock AI + EC2 Deploy | ✅ Completed | Bedrock integration, KB config, EC2 deployment |
 | 3 | Setup CI/CD Pipeline | ✅ Completed | CodeBuild + CodeDeploy integration, pipeline auto-triggered |
-| 4 | Deploy Infra with CDK | 🔜 | |
+| 4 | Deploy Infra with CDK | ✅ Completed | CDK app, CloudFormation stack, EC2 + IAM provisioning |
 | 5 | AIOps with X-Ray | 🔜 | |
 | 6 | Systems Manager Diagnostics | 🔜 | |
 | 7 | CloudWatch Anomaly Detection | 🔜 | |
@@ -42,8 +42,9 @@ Each lab folder contains relevant screenshots and test outputs to demonstrate pr
 - [Lab 1: Setup Code Quality & Unit Testing](./lab1-setup-code-quality/)
 - [Lab 2: Bedrock AI Integration & EC2 Deployment](./lab2-deploy-base-app/)
 - [Lab 3: Setup CI/CD Pipeline](./lab3-setup-cicd/)
+- [Lab 4: Deploy Infrastructure with CDK](./lab4-deploy-with-cdk/)
 
 ## 🧪 Next Steps
-- Continue Labs 4–7 to complete end-to-end DevOps pipeline
+- Continue Labs 5–7 to complete end-to-end DevOps pipeline
 - (Optional) Extend project with Docker, GitHub Actions CI/CD
 - (Optional) Re-deploy on AWS Free Tier for public showcase
