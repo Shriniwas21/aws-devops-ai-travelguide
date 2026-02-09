@@ -2,6 +2,7 @@
 
 ## 📌 Overview
 Hands-on project from Coursera's "DevOps and AI on AWS" specialization. This project involves deploying a Flask-based AI travel app using cloud-native DevOps practices.
+📘 Note: This repository was originally created in 2025 and updated in 2026 while revisiting the AWS DevOps & AI specialization to refresh concepts and improve documentation.
 
 ## 🛠️ Technologies
 - **Cloud Services**: Amazon EC2, S3, DynamoDB, CloudWatch, X-Ray, Systems Manager, OpenSearch Serverless
