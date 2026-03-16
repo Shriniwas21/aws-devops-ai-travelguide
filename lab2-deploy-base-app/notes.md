@@ -2,28 +2,31 @@
 
 ## ✅ Objective
 
-- Integrate Generative AI features into an existing Flask-based travel app using Amazon Bedrock.
-- Populate a knowledge base with travel review data stored in DynamoDB, pushed to S3.
-- Enable Titan foundation models and configure Bedrock with OpenSearch Serverless for RAG.
-- Launch and test AI-enhanced app locally using Bedrock API.
+- Update the TravelGuideAI Flask application to add generative AI features using Amazon Bedrock.
+- Create an Amazon Bedrock knowledge base using an S3 data source and OpenSearch Serverless vector store.
+- Test retrieval-augmented generation (RAG) in the Bedrock console and in the application UI.
 - Package the application and deploy it to an Amazon EC2 instance using userdata, systemd, and NGINX.
 - Verify successful AI response generation in both local and EC2-hosted environments.
 
 ---
 
-## Task 1: Add Amazon Bedrock AI Features
+## Task 1: Add Amazon Bedrock AI Features to the Application
 
 - Integrated Amazon Bedrock for AI-based itinerary and review responses.
+- Extracted the provided application update:
+  ```bash
+  unzip -o ~/update.zip
+  ```
 - Key file changes:
-  - `app.py` – Added routes for Bedrock AI: `/generate`, `/knowledge`
-  - `test_app.py` – Added unit tests for new AI features (mocked Bedrock APIs)
-  - `templates/city.html` – Added UI for Itinerary Planner + Review Bot
-  - `scripts/dbb_reviews_to_s3.py` – Script to extract DynamoDB reviews into S3
-  - `deployment/userdata.sh` – EC2 install + setup script
-  - `deployment/travelapp.service` – Systemd unit config
-  - `deployment/travelapp.conf` – NGINX reverse proxy config
+  - `app.py` – Added routes for Bedrock AI: streaming text generation (`invoke_model_with_response_stream`) - `/generate`, knowledge base retrieval + generation (`retrieve_and_generate`) - `/knowledge`
+  - `test_app.py` – Updated tests to mock Bedrock calls and validate AI endpoints
+  - `templates/city.html` – UI updates for: 🧭 Itinerary Planner + 💬 Review Bot
+  - `scripts/dbb_reviews_to_s3.py` – Exports DynamoDB reviews into S3 objects + metadata files for filtering
+  - `deployment/userdata.sh` – (bootstraps EC2: Python env, app install, systemd service, NGINX)
+  - `deployment/travelapp.service` – (systemd unit config)
+  - `deployment/travelapp.conf` – (NGINX reverse proxy configuration)
 
-📸 `source-control-changes.png`, `terminal-unzip-output.png`
+📸 `update-unzip-output.png`, `source-control-diff.png`
 
 ### Test Bedrock AI Update
 
@@ -31,70 +34,112 @@
 ```bash
   ./local_build.sh
 ```
-- ✅ PyLint: 10/10
-- ✅ Code coverage: 100%
-- Verified that all 6 updated tests pass
+- Confirmed:
+  - ✅ PyLint: 10/10
+  - ⚠️ Code coverage: 81% - Due to some incomplete test cases.
+  - Verified that all 6 updated tests pass
 
-📸 `pylint-after-bedrock-update.png`, `coverage-after-bedrock-update.png`
+📸 `local-build-success.png`, `coverage-report.png`
 
 ---
 
-## Task 2: Create Bedrock Knowledge Base
+## Task 2: Create Amazon Bedrock Knowledge Base Resources
 
-- Populated S3 with review content + metadata for RAG
+### Populate S3 data source from DynamoDB reviews 
+
+- Ran the script to export reviews to the knowledge base S3 bucket:
 ```bash
   python3 scripts/dbb_reviews_to_s3.py
 ```
-- Enabled Titan Text G1 + Embedding V2 models
-- Created knowledge base using OpenSearch Serverless
-- Synced vector store successfully: ✅ Available
+- Verified that each review produces:
+  - a `.txt` object (review content)
+  - a `.metadata.json` object (metadata used by knowledge base results)
 
-📸 `s3-populated-files.png`, `bedrock-model-access.png`, `bedrock-kb-config.png`, `bedrock-sync-complete.png`
+### Create Bedrock Knowledge Base (Vector Store)
 
-### Test KB in Bedrock Console
+- Created knowledge base: `travel-kb`
+- Selected:
+  - Existing service role: `AmazonBedrockExecutionRoleForKnowledgeBase`
+  - Data source: S3 bucket starting with `knowledge-base-bucket...`
+  - Embeddings model: Titan Text Embeddings V2
+  - Vector store type: OpenSearch Serverless (existing collection)
+  - Used lab-provided `CollectionARN`
+- Synced the data source and waited for status: ✅ Available
 
+📸 `s3-populated-files.png`, `s3-reviews-uploaded.png`, `bedrock-kb-create-1-details.png`, `bedrock-kb-create-2-embedding-vectorstore.png`, `bedrock-kb-sync-status.png`
+
+### Test Knowledge Base in Bedrock Console
+
+- Used “Test knowledge base”
+- Selected model: Nova Lite (On demand)
 - Ran prompt: “What should I do in Tokyo?”
 - Bedrock responded using RAG + metadata references
-- Verified metadata chunks and source document traceability
+- Opened “Details” to confirm retrieved chunks + metadata were included
 
-📸 `bedrock-kb-test-response.png`
+📸 `bedrock-kb-test-nova-lite.png`, `bedrock-kb-test-details-metadata.png`
 
-### Local AI App Launch
+### Run the AI-Enhanced Application Locally
 
-- Exported Bedrock KB ID:
- ```bash
-  export KNOWLEDGE_BASE_ID=`aws bedrock-agent list-knowledge-bases --query "knowledgeBaseSummaries[0].knowledgeBaseId" --output text`
-  flask run
+- Exported knowledge base ID for the application:
+```bash
+  export KNOWLEDGE_BASE_ID=`aws bedrock-agent list-knowledge-bases \
+    --query "knowledgeBaseSummaries[0].knowledgeBaseId" \
+    --output text`
 ```
-- Launched AI-enhanced app on `localhost:5000`
-- Verified New features: 🧭 Itinerary Planner + 💬 Review Bot
+- Launched the app locally: `flask run`
+- Verified New UI features: 🧭 Itinerary Planner (text generation) + 💬 Review Bot (RAG from knowledge base)
 
-📸 `ai-app-local-ui.png`, `terminal-flask-ai.png`
+📸 `kb-id-export-command.png`, `local-ai-ui-itinerary-reviewbot.png`, `flask-run-local.png`
 
 ---
 
-## Task 3: Package + Deploy App to EC2
+## Task 3: Deploy the Updated Application to EC2
 
-- Archived entire app + deployment config
-- Uploaded app.zip to S3 via `$DEPLOYMENT_BUCKET`
- ```bash
+### Package and upload deployment artifact
+
+- Created application archive from Git:
+```bash
   git archive -o /tmp/app.zip HEAD
+```
+- Uploaded app.zip to S3 via `$DEPLOYMENT_BUCKET`
+```bash
   aws s3 cp /tmp/app.zip s3://$DEPLOYMENT_BUCKET
 ```
 - Launched EC2 instance using `userdata.sh` to auto-install app, systemd, and NGINX
- ```bash
-  aws ec2 run-instances ... --user-data file://deployment/userdata.sh
+```bash
+  aws ec2 run-instances \
+    --image-id $AMI_ID \
+    --instance-type t2.micro \
+    --subnet-id $SUBNET_ID \
+    --security-group-ids $SECURITY_GROUP_ID \
+    --associate-public-ip-address \
+    --tag-specifications 'ResourceType=instance,Tags=[{Key=Name,Value=webserver}]' \
+    --iam-instance-profile Name=TravelApplicationInstanceProfile \
+    --user-data file:///home/ec2-user/environment/deployment/userdata.sh
 ```
 
-📸 `s3-upload-appzip.png`, `ec2-run-output.png`
+📸 `app-zip-archive.png`, `s3-upload-appzip.png`, `ec2-run-instances-output.png`
 
 ### Verify EC2 Deployment
 
-- Retrieved EC2 public IP and accessed deployed app via browser
+- Retrieved EC2 public IP
  ```bash
-  aws ec2 describe-instances --filters "Name=tag:Name,Values=webserver" \
-  --query "Reservations[].Instances[].PublicIpAddress" --output text
+  IP_ADDRESS=`aws ec2 describe-instances \
+    --filters "Name=tag:Name,Values=webserver" \
+    --query "Reservations[].Instances[].PublicIpAddress" \
+    --output text`
+  echo $IP_ADDRESS
 ```
+- Opened http://<PublicIP> in browser
+- Waited a few minutes for bootstrap; refreshed until city list loaded
 - Verified Bedrock features working (Itinerary Planner + Review Bot)
 
-📸 `deployed-app-browser.png`
+📸 `ec2-public-ip-output.png`, `ec2-deployed-app-browser.png`
+
+## ✅ Summary
+Successfully:
+- Added Bedrock-powered text generation + knowledge base Q&A features to the Flask app
+- Built a knowledge base using S3 + OpenSearch Serverless with Titan embeddings
+- Tested RAG responses in Bedrock console using Nova Lite
+- Ran the AI-enhanced app locally and validated new UI features
+- Deployed the application to EC2 using userdata, systemd, and NGINX
