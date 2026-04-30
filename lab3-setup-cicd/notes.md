@@ -3,12 +3,18 @@
 ## ✅ Objective
 - Add CodeBuild and CodeDeploy configuration files to the project.
 - Create AWS CodeBuild and CodeDeploy resources.
-- Set up a CI/CD pipeline using AWS CodePipeline to deploy the TravelGuideAI app to EC2.
-- Verify deployment by triggering changes through version control.
+- Set up a CI/CD pipeline using AWS CodePipeline.
+- Automate build, test and deployment to EC2.
+- Verify deployment via pipeline execution.
 
 ---
 
-## Task 1: Add CodeBuild and CodeDeploy Configs
+## Task 1: Initialize Repo & CI/CD Configs
+
+- Cloned repository:
+  ```bash
+  bash ~/clone_repo.sh
+  ```
 
 - Extracted update archive:
   ```bash
@@ -23,11 +29,11 @@
 - `scripts/stop_server` – Stops the application
 
 ### 📸 Screenshots:
-- `source-control-changes.png`, `terminal-unzip-output.png`
+- `repo-clone-output.png`, `source-control-changes.png`, `terminal-unzip-output.png`
 
 ---
 
-## Task 2: Create CodePipeline (CI Only)
+## Task 2: Create CodePipeline (CI Stage)
 
 - Created pipeline: `travelapp-pipeline`
 - Configured with:
@@ -37,12 +43,12 @@
     - Buildspec: `buildspecs/integration.yaml`
 
 ### 🔧 Observations:
-- ✅ PyLint ran with success
+- ✅ PyLint passed (10/10)
 - ✅ All 6 unit tests passed
 - ✅ Code coverage reports visible
 
 ### 📸 Screenshots:
-- `codebuild-logs.png`, `pipeline-stages-success.png`
+- `codebuild-logs.png`, `pipeline-stages-success.png`, `coverage-report.png`
 
 ---
 
@@ -52,9 +58,10 @@
 - Created Deployment Group: `InstancesGroup`
   - EC2 Tag: `Name = travel-app`
   - Role: `CodeDeployRole`
+  - Load balancer: `Disabled`
 
 ### 📸 Screenshots:
-- `codedeploy-app-config.png`
+- `codedeploy-app-config.png`, `deployment-group-config.png`
 
 ---
 
@@ -62,27 +69,40 @@
 
 - Added new stage: `Deploy`
 - Configured CodeDeploy deployment group in CodePipeline
-- Triggered deployment
-- The application was deployed to EC2 via CodeDeploy. While direct browser access was restricted due to security group limits, deployment logs confirmed success.
+- Accessed the EC2 instance using the provided `WebServerURL`
+- Observed default NGINX welcome page (application not yet deployed)
+- Triggered deployment via `Release change`
+- The application was deployed to EC2 via CodeDeploy.
+- Accessed the deployed application using EC2 public URL and it was successfully loaded.
 
 ### 📸 Screenshots:
-- `pipeline-with-deploy.png`, `codedeploy-complete.png`
+- `pipeline-with-deploy.png`, `nginx-default-page.png`,  `codedeploy-success.png`, `app-browser-view.png`
 
 ---
 
-## Task 5: Trigger Auto Deployment via Git Push
+## Task 5: Trigger Auto Deployment via Release change
 
-- Updated background image:
+- Applied Update:
   ```bash
   unzip -o ~/update2.zip
+  ```
+
+- Triggered pipeline after commit via `Release change`
+  ```bash
   git add .
   git commit -m "Updated the application background image"
   git push
   ```
 
-- Verified pipeline stages auto-triggered
+- Verified pipeline stages triggered via `Release change`
 - ✅ Build + Deploy stages succeeded
-- ⚠️ Due to lab security group restrictions, browser verification was not possible. Verified deployment success through logs.
+- ✅ Changes reflected in browser
 
 ### 📸 Screenshots:
-- `codepipeline-auto-deploy.png`, `codedeploy-logs-success.png`
+- `updated-app-commit.png`, `codepipeline-success.png`, `updated-app-ui.png`
+
+## ✅ Summary
+Successfully:
+- Implemented CI/CD pipeline using AWS Codepipeline
+- Automated build (CodeBuild) and deployment (CodeDeploy)
+- Verified application deployment via browser

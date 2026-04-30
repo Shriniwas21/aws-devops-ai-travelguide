@@ -32,7 +32,7 @@ Each lab folder contains relevant screenshots and test outputs to demonstrate pr
 |-----|-------|--------|-----------|
 | 1 | Code Quality & Unit Testing | ✅ Completed | Flask app run, PyLint, test coverage |
 | 2 | Bedrock AI + EC2 Deploy | ✅ Completed | Bedrock integration, KB config, EC2 deployment |
-| 3 | Setup CI/CD Pipeline | ✅ Completed | CodeBuild + CodeDeploy integration, pipeline auto-triggered |
+| 3 | Setup CI/CD Pipeline | ✅ Completed | CodeBuild + CodeDeploy integration, pipeline triggered via `Release change` |
 | 4 | Deploy Infra with CDK | ✅ Completed | CDK app, CloudFormation stack, EC2 + IAM provisioning |
 | 5 | CloudWatch Anomaly Detection | ✅ Completed | Anomaly detector + alarm, CLI metric analysis, custom metrics |
 | 6 | Systems Manager Diagnostics | 🔜 | |
